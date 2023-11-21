@@ -1,8 +1,13 @@
-
 import numpy as np
+
+# Function to print the transportation table
 def PrintTable(S, C, D):
+    # Function to display the transportation table
+    # S: Supply vector, C: Cost matrix, D: Demand vector
     num_s = len(S)
     num_d = len(D)
+    
+    # Printing column headers for destinations
     print(f"{'Sources/Destinations':<20}", end="")
     for j in range(num_d):
         print(f"{'Destination ' + str(j + 1):<15}", end="")
@@ -27,12 +32,12 @@ def PrintTable(S, C, D):
         print(f"{D[j]:<15}", end="")
     print("\n")
 
-
+# Function to find the cell in the matrix with the smallest value
 def fi(matrix):
+    # Find the cell with the smallest value in the matrix
     if not matrix or not matrix[0]:
         return None  # Empty matrix
 
-    # Initialize variables to store the coord of the most negative element
     min_v = float('inf')
     min_c = None
 
@@ -49,8 +54,9 @@ def fi(matrix):
 
     return min_c, ok
 
-
+# Function implementing Russell's approximation method
 def Russel(s_v, dem_v, cost_matrix):
+    # Russell's approximation method for solving transportation problem
     col = [max(row) for row in cost_matrix]
     row = [max(column) for column in zip(*cost_matrix)]
     c_m = [[element for element in row] for row in cost_matrix]
@@ -80,14 +86,16 @@ def Russel(s_v, dem_v, cost_matrix):
             for i in range(m):
                 c_m[r][i] = 1
 
-    print("using Russells approximation method:")
+    print("using Russell's approximation method:")
     print_allocation(zero_matrix)
 
     s = 0
     for i in range(n):
         for j in range(m):
             s = s + zero_matrix[i][j] * cost_matrix[i][j]
-    print("cost",s)
+    print("cost", s)
+
+# Function to find the difference for Vogel's method
 def findDiff(cost_matrix):
     rowDiff = []
     colDiff = []
@@ -104,13 +112,15 @@ def findDiff(cost_matrix):
         col += 1
         colDiff.append(arr[1] - arr[0])
     return rowDiff, colDiff
+
+# Function implementing Vogel's approximation method
 def vogel(supply, demand, cost_matrix):
+    # Vogel's approximation method for solving transportation problem
     n = len(cost_matrix)
     m = len(cost_matrix[0])
     INF = 10 ** 3
 
     ans = 0
-
     num_rows = len(supply)
     num_cols = len(demand)
     allocations = [[0] * num_cols for _ in range(num_rows)]
@@ -159,33 +169,28 @@ def vogel(supply, demand, cost_matrix):
                             break
                     break
 
-
-    print("using Vogels approximation method ")
+    print("using Vogel's approximation method")
     print_allocation(allocations)
     print("cost:", ans)
+
+# Function implementing the North-West corner method
 def northWestCorner(cost_matrix, supply, demand):
+    # North-West corner method for solving transportation problem
     num_suppliers = len(supply)
     num_consumers = len(demand)
 
-    # Initialize the alloc matrix with zeros
     alloc = [[0 for _ in range(num_consumers)] for _ in range(num_suppliers)]
 
-    # Initialize indices for suppliers and consumers
     i, j = 0, 0
 
-    # Iterate until all supply and demand are exhausted
     while i < num_suppliers and j < num_consumers:
-        # Find the minimum between supply[i] and demand[j]
         quant = min(supply[i], demand[j])
 
-        # Allocate the quant to the current cell
         alloc[i][j] = quant
 
-        # Update supply and demand
         supply[i] -= quant
         demand[j] -= quant
 
-        # Move to the next row or column based on which is exhausted first
         if supply[i] == 0:
             i += 1
         else:
@@ -193,29 +198,30 @@ def northWestCorner(cost_matrix, supply, demand):
 
     return alloc
 
-
+# Function to print the allocations
 def print_allocation(alloc):
     print("[")
     for row in alloc:
-        print(row,"_")
+        print(row, "_")
     print("]")
 
-
+# Main function
 if __name__ == "__main__":
-    supply = [float(x) for x in input("enter the vector  of source.   ").split()]
-    assert len(supply) == 3, "The length of this vector must be 3"
-    assert all(x >= 0 for x in
-               supply), "All elements in the supply vector must be greater than or equal to zero the method is not applicable."
-    print("Enter the matrix of coefficients of costs.")
+    # User inputs supply, cost matrix, and demand
+    supply = [float(x) for x in input("Enter the vector of sources: ").split()]
+    assert len(supply) == 3, "The length of the supply vector must be 3"
+    assert all(x >= 0 for x in supply), "All elements in the supply vector must be greater than or equal to zero."
+
+    print("Enter the cost matrix:")
     cost_matrix = [[float(x) for x in input().split()] for _ in range(3)]
-    assert all(x > 0 for row in cost_matrix for x in
-               row), "All elements in the cost matrix must be greater than  zero the method is not applicable."
-    assert len(cost_matrix) == 3 and len(cost_matrix[
-                                             0]) == 4, "The shape of matrix of coefficients of constraint function must be equal (number of sources x number of destenations)"
-    demand = [float(x) for x in input("Enter the vector of demand   ").split()]
-    assert len(demand) == len(cost_matrix[0]), "The length of this vector must be 4"
-    assert all(x >= 0 for x in
-               demand), "All elements in the demand vector must be greater than or equal to zero the method is not applicable."
+    assert all(x > 0 for row in cost_matrix for x in row), "All elements in the cost matrix must be greater than zero."
+    assert len(cost_matrix) == 3 and len(cost_matrix[0]) == 4, "The dimensions of the cost matrix must be 3x4"
+
+    demand = [float(x) for x in input("Enter the vector of demand: ").split()]
+    assert len(demand) == len(cost_matrix[0]), "The length of the demand vector must be 4"
+    assert all(x >= 0 for x in demand), "All elements in the demand vector must be greater than or equal to zero."
+
+    # Copying the inputs for different methods
     NORTHSUPLY = supply[:]
     VogelSupply = supply[:]
     RusellSupply = supply[:]
@@ -225,17 +231,24 @@ if __name__ == "__main__":
     cost_matrixN = [row[:] for row in cost_matrix]
     cost_matrixV = [row[:] for row in cost_matrix]
     cost_matrixR = [row[:] for row in cost_matrix]
+
+    # Printing the transportation table
     PrintTable(supply, cost_matrix, demand)
     print("The problem is unbalanced." if sum(supply) != sum(demand) else "The problem is balanced.")
 
+    # North-West Corner method
     alloc = northWestCorner(cost_matrixN, NORTHSUPLY, NorthDemand)
-    cost=0
+    cost = 0
 
-    print("using north-west corner method")
+    print("Using North-West corner method")
     print_allocation(alloc)
     for i in range(len(alloc)):
         for j in range(len(alloc[0])):
             cost = cost + alloc[i][j] * cost_matrix[i][j]
-    print("cost:",cost)
-    vogel(VogelSupply,vogelDemand,cost_matrixV)
+    print("Cost:", cost)
+
+    # Vogel's approximation method
+    vogel(VogelSupply, vogelDemand, cost_matrixV)
+
+    # Russell's approximation method
     Russel(RusellSupply, demandR, cost_matrixR)
